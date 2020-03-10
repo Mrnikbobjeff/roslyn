@@ -821,7 +821,18 @@ oneMoreTime:
                     EmitCatchBlock(catchBlock);
                 }
             }
+            if (!emitCatchesOnly && (statement.FaultedBlockOpt != null))
+            {
+                _builder.OpenLocalScope(ScopeType.Fault);
+                EmitBlock(statement.FaultedBlockOpt);
 
+                // close Fault scope
+                _builder.CloseLocalScope();
+
+                // close the whole try statement scope
+                _builder.CloseLocalScope();
+
+            }
             if (!emitCatchesOnly && (statement.FinallyBlockOpt != null))
             {
                 _builder.OpenLocalScope(statement.PreferFaultHandler ? ScopeType.Fault : ScopeType.Finally);

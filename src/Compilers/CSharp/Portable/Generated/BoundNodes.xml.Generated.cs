@@ -3515,8 +3515,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
     internal sealed partial class BoundTryStatement : BoundStatement
     {
-        public BoundTryStatement(SyntaxNode syntax, BoundBlock tryBlock, ImmutableArray<BoundCatchBlock> catchBlocks, BoundBlock? finallyBlockOpt, LabelSymbol? finallyLabelOpt, bool preferFaultHandler, bool hasErrors = false)
-            : base(BoundKind.TryStatement, syntax, hasErrors || tryBlock.HasErrors() || catchBlocks.HasErrors() || finallyBlockOpt.HasErrors())
+        public BoundTryStatement(SyntaxNode syntax, BoundBlock tryBlock, ImmutableArray<BoundCatchBlock> catchBlocks, BoundBlock? finallyBlockOpt, BoundBlock? faultedBlockOpt, LabelSymbol? finallyLabelOpt, bool preferFaultHandler, bool hasErrors = false)
+            : base(BoundKind.TryStatement, syntax, hasErrors || tryBlock.HasErrors() || catchBlocks.HasErrors() || finallyBlockOpt.HasErrors() || faultedBlockOpt.HasErrors())
         {
 
             RoslynDebug.Assert(tryBlock is object, "Field 'tryBlock' cannot be null (make the type nullable in BoundNodes.xml to remove this check)");
@@ -3525,6 +3525,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             this.TryBlock = tryBlock;
             this.CatchBlocks = catchBlocks;
             this.FinallyBlockOpt = finallyBlockOpt;
+            this.FaultedBlockOpt = faultedBlockOpt;
             this.FinallyLabelOpt = finallyLabelOpt;
             this.PreferFaultHandler = preferFaultHandler;
         }
@@ -3536,17 +3537,19 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public BoundBlock? FinallyBlockOpt { get; }
 
+        public BoundBlock? FaultedBlockOpt { get; }
+
         public LabelSymbol? FinallyLabelOpt { get; }
 
         public bool PreferFaultHandler { get; }
         [DebuggerStepThrough]
         public override BoundNode? Accept(BoundTreeVisitor visitor) => visitor.VisitTryStatement(this);
 
-        public BoundTryStatement Update(BoundBlock tryBlock, ImmutableArray<BoundCatchBlock> catchBlocks, BoundBlock? finallyBlockOpt, LabelSymbol? finallyLabelOpt, bool preferFaultHandler)
+        public BoundTryStatement Update(BoundBlock tryBlock, ImmutableArray<BoundCatchBlock> catchBlocks, BoundBlock? finallyBlockOpt, BoundBlock? faultedBlockOpt, LabelSymbol? finallyLabelOpt, bool preferFaultHandler)
         {
-            if (tryBlock != this.TryBlock || catchBlocks != this.CatchBlocks || finallyBlockOpt != this.FinallyBlockOpt || !Symbols.SymbolEqualityComparer.ConsiderEverything.Equals(finallyLabelOpt, this.FinallyLabelOpt) || preferFaultHandler != this.PreferFaultHandler)
+            if (tryBlock != this.TryBlock || catchBlocks != this.CatchBlocks || finallyBlockOpt != this.FinallyBlockOpt || faultedBlockOpt != this.FaultedBlockOpt || !Symbols.SymbolEqualityComparer.ConsiderEverything.Equals(finallyLabelOpt, this.FinallyLabelOpt) || preferFaultHandler != this.PreferFaultHandler)
             {
-                var result = new BoundTryStatement(this.Syntax, tryBlock, catchBlocks, finallyBlockOpt, finallyLabelOpt, preferFaultHandler, this.HasErrors);
+                var result = new BoundTryStatement(this.Syntax, tryBlock, catchBlocks, finallyBlockOpt, faultedBlockOpt, finallyLabelOpt, preferFaultHandler, this.HasErrors);
                 result.CopyAttributes(this);
                 return result;
             }
@@ -8559,6 +8562,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             this.Visit(node.TryBlock);
             this.VisitList(node.CatchBlocks);
             this.Visit(node.FinallyBlockOpt);
+            this.Visit(node.FaultedBlockOpt);
             return null;
         }
         public override BoundNode? VisitCatchBlock(BoundCatchBlock node)
@@ -9525,7 +9529,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             BoundBlock tryBlock = (BoundBlock)this.Visit(node.TryBlock);
             ImmutableArray<BoundCatchBlock> catchBlocks = this.VisitList(node.CatchBlocks);
             BoundBlock? finallyBlockOpt = (BoundBlock?)this.Visit(node.FinallyBlockOpt);
-            return node.Update(tryBlock, catchBlocks, finallyBlockOpt, node.FinallyLabelOpt, node.PreferFaultHandler);
+            BoundBlock? faultedBlockOpt = (BoundBlock?)this.Visit(node.FaultedBlockOpt);
+            return node.Update(tryBlock, catchBlocks, finallyBlockOpt, faultedBlockOpt, node.FinallyLabelOpt, node.PreferFaultHandler);
         }
         public override BoundNode? VisitCatchBlock(BoundCatchBlock node)
         {
@@ -13137,6 +13142,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             new TreeDumperNode("tryBlock", null, new TreeDumperNode[] { Visit(node.TryBlock, null) }),
             new TreeDumperNode("catchBlocks", null, from x in node.CatchBlocks select Visit(x, null)),
             new TreeDumperNode("finallyBlockOpt", null, new TreeDumperNode[] { Visit(node.FinallyBlockOpt, null) }),
+            new TreeDumperNode("faultedBlockOpt", null, new TreeDumperNode[] { Visit(node.FaultedBlockOpt, null) }),
             new TreeDumperNode("finallyLabelOpt", node.FinallyLabelOpt, null),
             new TreeDumperNode("preferFaultHandler", node.PreferFaultHandler, null),
             new TreeDumperNode("hasErrors", node.HasErrors, null)

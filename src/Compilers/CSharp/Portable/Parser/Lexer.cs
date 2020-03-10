@@ -802,12 +802,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 // All the 'common' identifier characters are represented directly in
                 // these switch cases for optimal perf.  Calling IsIdentifierChar() functions is relatively
                 // expensive.
+
+                case 'f':
                 case 'a':
                 case 'b':
                 case 'c':
                 case 'd':
                 case 'e':
-                case 'f':
                 case 'g':
                 case 'h':
                 case 'i':

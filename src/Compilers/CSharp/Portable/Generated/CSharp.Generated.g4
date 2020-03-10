@@ -575,7 +575,7 @@ throw_statement
   ;
 
 try_statement
-  : attribute_list* 'try' block catch_clause* finally_clause?
+  : attribute_list* 'try' block catch_clause* finally_clause? faulted_clause?
   ;
 
 catch_clause
@@ -592,6 +592,10 @@ catch_filter_clause
 
 finally_clause
   : 'finally' block
+  ;
+
+faulted_clause
+  : 'faulted' block
   ;
 
 unsafe_statement

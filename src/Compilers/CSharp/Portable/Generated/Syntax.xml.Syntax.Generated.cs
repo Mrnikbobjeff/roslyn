@@ -7011,6 +7011,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
         private BlockSyntax? block;
         private SyntaxNode? catches;
         private FinallyClauseSyntax? @finally;
+        private FaultedClauseSyntax? faulted;
 
         internal TryStatementSyntax(InternalSyntax.CSharpSyntaxNode green, SyntaxNode? parent, int position)
           : base(green, parent, position)
@@ -7027,6 +7028,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
 
         public FinallyClauseSyntax? Finally => GetRed(ref this.@finally, 4);
 
+        public FaultedClauseSyntax? Faulted => GetRed(ref this.faulted, 5);
+
         internal override SyntaxNode? GetNodeSlot(int index)
             => index switch
             {
@@ -7034,6 +7037,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
                 2 => GetRed(ref this.block, 2)!,
                 3 => GetRed(ref this.catches, 3)!,
                 4 => GetRed(ref this.@finally, 4),
+                5 => GetRed(ref this.faulted, 5),
                 _ => null,
             };
 
@@ -7044,17 +7048,18 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
                 2 => this.block,
                 3 => this.catches,
                 4 => this.@finally,
+                5 => this.faulted,
                 _ => null,
             };
 
         public override void Accept(CSharpSyntaxVisitor visitor) => visitor.VisitTryStatement(this);
         public override TResult Accept<TResult>(CSharpSyntaxVisitor<TResult> visitor) => visitor.VisitTryStatement(this);
 
-        public TryStatementSyntax Update(SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)
+        public TryStatementSyntax Update(SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted)
         {
-            if (attributeLists != this.AttributeLists || tryKeyword != this.TryKeyword || block != this.Block || catches != this.Catches || @finally != this.Finally)
+            if (attributeLists != this.AttributeLists || tryKeyword != this.TryKeyword || block != this.Block || catches != this.Catches || @finally != this.Finally || faulted != this.Faulted)
             {
-                var newNode = SyntaxFactory.TryStatement(attributeLists, tryKeyword, block, catches, @finally);
+                var newNode = SyntaxFactory.TryStatement(attributeLists, tryKeyword, block, catches, @finally, faulted);
                 var annotations = GetAnnotations();
                 return annotations?.Length > 0 ? newNode.WithAnnotations(annotations) : newNode;
             }
@@ -7063,11 +7068,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
         }
 
         internal override StatementSyntax WithAttributeListsCore(SyntaxList<AttributeListSyntax> attributeLists) => WithAttributeLists(attributeLists);
-        public new TryStatementSyntax WithAttributeLists(SyntaxList<AttributeListSyntax> attributeLists) => Update(attributeLists, this.TryKeyword, this.Block, this.Catches, this.Finally);
-        public TryStatementSyntax WithTryKeyword(SyntaxToken tryKeyword) => Update(this.AttributeLists, tryKeyword, this.Block, this.Catches, this.Finally);
-        public TryStatementSyntax WithBlock(BlockSyntax block) => Update(this.AttributeLists, this.TryKeyword, block, this.Catches, this.Finally);
-        public TryStatementSyntax WithCatches(SyntaxList<CatchClauseSyntax> catches) => Update(this.AttributeLists, this.TryKeyword, this.Block, catches, this.Finally);
-        public TryStatementSyntax WithFinally(FinallyClauseSyntax? @finally) => Update(this.AttributeLists, this.TryKeyword, this.Block, this.Catches, @finally);
+        public new TryStatementSyntax WithAttributeLists(SyntaxList<AttributeListSyntax> attributeLists) => Update(attributeLists, this.TryKeyword, this.Block, this.Catches, this.Finally, this.Faulted);
+        public TryStatementSyntax WithTryKeyword(SyntaxToken tryKeyword) => Update(this.AttributeLists, tryKeyword, this.Block, this.Catches, this.Finally, this.Faulted);
+        public TryStatementSyntax WithBlock(BlockSyntax block) => Update(this.AttributeLists, this.TryKeyword, block, this.Catches, this.Finally, this.Faulted);
+        public TryStatementSyntax WithCatches(SyntaxList<CatchClauseSyntax> catches) => Update(this.AttributeLists, this.TryKeyword, this.Block, catches, this.Finally, this.Faulted);
+        public TryStatementSyntax WithFinally(FinallyClauseSyntax? @finally) => Update(this.AttributeLists, this.TryKeyword, this.Block, this.Catches, @finally, this.Faulted);
+        public TryStatementSyntax WithFaulted(FaultedClauseSyntax? faulted) => Update(this.AttributeLists, this.TryKeyword, this.Block, this.Catches, this.Finally, faulted);
 
         internal override StatementSyntax AddAttributeListsCore(params AttributeListSyntax[] items) => AddAttributeLists(items);
         public new TryStatementSyntax AddAttributeLists(params AttributeListSyntax[] items) => WithAttributeLists(this.AttributeLists.AddRange(items));
@@ -7265,6 +7271,45 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
 
         public FinallyClauseSyntax AddBlockAttributeLists(params AttributeListSyntax[] items) => WithBlock(this.Block.WithAttributeLists(this.Block.AttributeLists.AddRange(items)));
         public FinallyClauseSyntax AddBlockStatements(params StatementSyntax[] items) => WithBlock(this.Block.WithStatements(this.Block.Statements.AddRange(items)));
+    }
+
+    public sealed partial class FaultedClauseSyntax : CSharpSyntaxNode
+    {
+        private BlockSyntax? block;
+
+        internal FaultedClauseSyntax(InternalSyntax.CSharpSyntaxNode green, SyntaxNode? parent, int position)
+          : base(green, parent, position)
+        {
+        }
+
+        public SyntaxToken FaultedKeyword => new SyntaxToken(this, ((Syntax.InternalSyntax.FaultedClauseSyntax)this.Green).faultedKeyword, Position, 0);
+
+        public BlockSyntax Block => GetRed(ref this.block, 1)!;
+
+        internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.block, 1)! : null;
+
+        internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.block : null;
+
+        public override void Accept(CSharpSyntaxVisitor visitor) => visitor.VisitFaultedClause(this);
+        public override TResult Accept<TResult>(CSharpSyntaxVisitor<TResult> visitor) => visitor.VisitFaultedClause(this);
+
+        public FaultedClauseSyntax Update(SyntaxToken faultedKeyword, BlockSyntax block)
+        {
+            if (faultedKeyword != this.FaultedKeyword || block != this.Block)
+            {
+                var newNode = SyntaxFactory.FaultedClause(faultedKeyword, block);
+                var annotations = GetAnnotations();
+                return annotations?.Length > 0 ? newNode.WithAnnotations(annotations) : newNode;
+            }
+
+            return this;
+        }
+
+        public FaultedClauseSyntax WithFaultedKeyword(SyntaxToken faultedKeyword) => Update(faultedKeyword, this.Block);
+        public FaultedClauseSyntax WithBlock(BlockSyntax block) => Update(this.FaultedKeyword, block);
+
+        public FaultedClauseSyntax AddBlockAttributeLists(params AttributeListSyntax[] items) => WithBlock(this.Block.WithAttributeLists(this.Block.AttributeLists.AddRange(items)));
+        public FaultedClauseSyntax AddBlockStatements(params StatementSyntax[] items) => WithBlock(this.Block.WithStatements(this.Block.Statements.AddRange(items)));
     }
 
     public sealed partial class CompilationUnitSyntax : CSharpSyntaxNode

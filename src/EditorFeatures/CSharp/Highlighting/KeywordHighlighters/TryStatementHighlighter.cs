@@ -38,6 +38,10 @@ namespace Microsoft.CodeAnalysis.Editor.CSharp.KeywordHighlighting.KeywordHighli
             {
                 highlights.Add(tryStatement.Finally.FinallyKeyword.Span);
             }
+            if (tryStatement.Faulted != null)
+            {
+                highlights.Add(tryStatement.Faulted.FaultedKeyword.Span);
+            }
         }
     }
 }

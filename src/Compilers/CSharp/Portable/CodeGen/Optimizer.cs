@@ -1556,8 +1556,11 @@ namespace Microsoft.CodeAnalysis.CSharp.CodeGen
             var finallyBlock = (BoundBlock)this.Visit(node.FinallyBlockOpt);
 
             EnsureOnlyEvalStack();
+            var faultedBlock = (BoundBlock)this.Visit(node.FaultedBlockOpt);
 
-            return node.Update(tryBlock, catchBlocks, finallyBlock, finallyLabelOpt: node.FinallyLabelOpt, node.PreferFaultHandler);
+            EnsureOnlyEvalStack();
+
+            return node.Update(tryBlock, catchBlocks, finallyBlock, faultedBlockOpt: faultedBlock, finallyLabelOpt: node.FinallyLabelOpt, node.PreferFaultHandler);
         }
 
         public override BoundNode VisitCatchBlock(BoundCatchBlock node)

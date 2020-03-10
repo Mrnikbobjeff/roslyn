@@ -392,7 +392,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 syntax: syntax,
                 tryBlock: tryBlock,
                 catchBlocks: ImmutableArray<BoundCatchBlock>.Empty,
-                finallyBlockOpt: BoundBlock.SynthesizedNoLocals(syntax, finallyStatement));
+                finallyBlockOpt: BoundBlock.SynthesizedNoLocals(syntax, finallyStatement), null);
 
             return tryFinally;
         }

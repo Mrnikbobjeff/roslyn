@@ -360,6 +360,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                     (BoundBlock)Visit(node.TryBlock),
                                     VisitList(node.CatchBlocks),
                                     (BoundBlock)Visit(node.FinallyBlockOpt),
+                                    (BoundBlock)Visit(node.FaultedBlockOpt),
                                     node.FinallyLabelOpt,
                                     node.PreferFaultHandler);
 

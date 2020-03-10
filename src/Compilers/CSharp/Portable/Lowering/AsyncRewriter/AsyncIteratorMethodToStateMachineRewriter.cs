@@ -325,7 +325,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 //  }
                 node = node.Update(
                     tryBlock: F.Block(node.TryBlock, F.Label(finallyEntry)),
-                    node.CatchBlocks, F.Block(node.FinallyBlockOpt, F.Label(finallyExit)), node.FinallyLabelOpt, node.PreferFaultHandler);
+                    node.CatchBlocks, F.Block(node.FinallyBlockOpt, F.Label(finallyExit)), node.FaultedBlockOpt, node.FinallyLabelOpt, node.PreferFaultHandler);
             }
             else if ((object)node.FinallyLabelOpt != null)
             {

@@ -6313,6 +6313,7 @@ done:;
                     case SyntaxKind.TryKeyword:
                     case SyntaxKind.CatchKeyword:
                     case SyntaxKind.FinallyKeyword:
+                    case SyntaxKind.FaultedKeyword:
                         return this.ParseTryStatement(attributes);
                     case SyntaxKind.CheckedKeyword:
                     case SyntaxKind.UncheckedKeyword:
@@ -6988,7 +6989,6 @@ done:;
                 (SyntaxToken)openBrace,
                 statements,
                 this.EatToken(SyntaxKind.CloseBraceToken));
-
             _pool.Free(statements);
             return block;
         }
@@ -7116,6 +7116,7 @@ done:;
 
                 case SyntaxKind.CatchKeyword:
                 case SyntaxKind.FinallyKeyword:
+                case SyntaxKind.FaultedKeyword:
                     return !_isInTry;
 
                 // Accessibility modifiers are not legal in a statement,
@@ -7233,6 +7234,7 @@ done:;
 
             var catches = default(SyntaxListBuilder<CatchClauseSyntax>);
             FinallyClauseSyntax @finally = null;
+            FaultedClauseSyntax @faulted = null;
             try
             {
                 bool hasEnd = false;
@@ -7255,6 +7257,14 @@ done:;
                     @finally = _syntaxFactory.FinallyClause(fin, finBlock);
                 }
 
+                if (this.CurrentToken.Kind == SyntaxKind.FaultedKeyword)
+                {
+                    hasEnd = true;
+                    var fau = this.EatToken();
+                    var faultBlock = this.ParsePossiblyAttributedBlock();
+                    @faulted = _syntaxFactory.FaultedClause(fau, faultBlock);
+                }
+
                 if (!hasEnd)
                 {
                     block = this.AddErrorToLastToken(block, ErrorCode.ERR_ExpectedEndTry);
@@ -7271,7 +7281,7 @@ done:;
 
                 _isInTry = isInTry;
 
-                return _syntaxFactory.TryStatement(attributes, @try, block, catches, @finally);
+                return _syntaxFactory.TryStatement(attributes, @try, block, catches, @finally, faulted);
             }
             finally
             {
@@ -7286,7 +7296,8 @@ done:;
         {
             return this.CurrentToken.Kind == SyntaxKind.CloseBraceToken
                 || this.CurrentToken.Kind == SyntaxKind.CatchKeyword
-                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword;
+                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword
+                || this.CurrentToken.Kind == SyntaxKind.FaultedKeyword;
         }
 
         private CatchClauseSyntax ParseCatchClause()
@@ -7354,7 +7365,8 @@ done:;
                 || this.CurrentToken.Kind == SyntaxKind.OpenBraceToken
                 || this.CurrentToken.Kind == SyntaxKind.CloseBraceToken
                 || this.CurrentToken.Kind == SyntaxKind.CatchKeyword
-                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword;
+                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword
+                || this.CurrentToken.Kind == SyntaxKind.FaultedKeyword;
         }
 
         private bool IsEndOfFilterClause()
@@ -7363,13 +7375,15 @@ done:;
                 || this.CurrentToken.Kind == SyntaxKind.OpenBraceToken
                 || this.CurrentToken.Kind == SyntaxKind.CloseBraceToken
                 || this.CurrentToken.Kind == SyntaxKind.CatchKeyword
-                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword;
+                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword
+                || this.CurrentToken.Kind == SyntaxKind.FaultedKeyword;
         }
         private bool IsEndOfCatchBlock()
         {
             return this.CurrentToken.Kind == SyntaxKind.CloseBraceToken
                 || this.CurrentToken.Kind == SyntaxKind.CatchKeyword
-                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword;
+                || this.CurrentToken.Kind == SyntaxKind.FinallyKeyword
+                || this.CurrentToken.Kind == SyntaxKind.FaultedKeyword;
         }
 
         private StatementSyntax ParseCheckedStatement(SyntaxList<AttributeListSyntax> attributes)
@@ -8657,6 +8671,7 @@ tryAgain:
                 case SyntaxKind.ContinueKeyword:
                 case SyntaxKind.DoKeyword:
                 case SyntaxKind.FinallyKeyword:
+                case SyntaxKind.FaultedKeyword:
                 case SyntaxKind.ForKeyword:
                 case SyntaxKind.ForEachKeyword:
                 case SyntaxKind.GotoKeyword:

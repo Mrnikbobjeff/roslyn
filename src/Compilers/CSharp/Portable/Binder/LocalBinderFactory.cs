@@ -645,6 +645,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 Visit(node.Finally, _enclosing);
             }
+
+            if (node.Faulted != null)
+            {
+                Visit(node.Faulted, _enclosing);
+            }
         }
 
         public override void VisitCatchClause(CatchClauseSyntax node)
@@ -666,6 +671,27 @@ namespace Microsoft.CodeAnalysis.CSharp
         public override void VisitCatchFilterClause(CatchFilterClauseSyntax node)
         {
             Visit(node.FilterExpression);
+        }
+
+        public override void VisitFaultedClause(FaultedClauseSyntax node)
+        {
+            // NOTE: We're going to cheat a bit - we know that the block is definitely going 
+            // to get a map entry, so we don't need to worry about the WithAdditionalFlags
+            // binder being dropped.  That is, there's no point in adding the WithAdditionalFlags
+            // binder to the map ourselves and having VisitBlock unconditionally overwrite it.
+
+            // If this finally block is nested inside a catch block, we need to use a distinct
+            // binder flag so that we can detect the nesting order for error CS074: A throw
+            // statement with no arguments is not allowed in a finally clause that is nested inside
+            // the nearest enclosing catch clause.
+
+            var additionalFlags = BinderFlags.InFaultedBlock;
+
+
+            Visit(node.Block, _enclosing.WithAdditionalFlags(additionalFlags));
+
+            Binder finallyBinder;
+            Debug.Assert(_map.TryGetValue(node.Block, out _));
         }
 
         public override void VisitFinallyClause(FinallyClauseSyntax node)

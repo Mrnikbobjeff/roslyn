@@ -17,7 +17,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public static IEnumerable<SyntaxKind> GetReservedKeywordKinds()
         {
-            for (int i = (int)SyntaxKind.BoolKeyword; i <= (int)SyntaxKind.ImplicitKeyword; i++)
+            for (int i = (int)SyntaxKind.BoolKeyword; i <= (int)SyntaxKind.FaultedKeyword; i++)
             {
                 yield return (SyntaxKind)i;
             }
@@ -38,7 +38,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public static bool IsReservedKeyword(SyntaxKind kind)
         {
-            return kind >= SyntaxKind.BoolKeyword && kind <= SyntaxKind.ImplicitKeyword;
+            return kind >= SyntaxKind.BoolKeyword && kind <= SyntaxKind.FaultedKeyword;
         }
 
         public static bool IsAttributeTargetSpecifier(SyntaxKind kind)
@@ -862,6 +862,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return SyntaxKind.LockKeyword;
                 case "try":
                     return SyntaxKind.TryKeyword;
+                case "faulted":
+                    return SyntaxKind.FaultedKeyword;
                 case "throw":
                     return SyntaxKind.ThrowKeyword;
                 case "catch":
@@ -1414,6 +1416,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return "default";
                 case SyntaxKind.TryKeyword:
                     return "try";
+                case SyntaxKind.FaultedKeyword:
+                    return "faulted";
                 case SyntaxKind.CatchKeyword:
                     return "catch";
                 case SyntaxKind.FinallyKeyword:

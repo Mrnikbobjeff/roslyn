@@ -163,6 +163,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         OperatorKeyword = 8382,
         ExplicitKeyword = 8383,
         ImplicitKeyword = 8384,
+        FaultedKeyword = 8385,
 
         // contextual keywords
         YieldKeyword = 8405,
@@ -493,6 +494,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         CatchDeclaration = 8827,
         CatchFilterClause = 8828,
         FinallyClause = 8829,
+        FaultedClause = 8831,
 
         // statements that didn't fit above
         LocalFunctionStatement = 8830,

@@ -1049,6 +1049,7 @@
     <Field Name="TryBlock" Type="BoundBlock"/>
     <Field Name="CatchBlocks" Type="ImmutableArray&lt;BoundCatchBlock&gt;"/>
     <Field Name="FinallyBlockOpt" Type="BoundBlock?"/>
+    <Field Name="FaultedBlockOpt" Type="BoundBlock?"/>
 
     <!--
     When lowering trys, we sometimes extract the finally clause out of the try.

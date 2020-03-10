@@ -3749,12 +3749,13 @@ namespace Microsoft.CodeAnalysis.CSharp.CodeGeneration
                 statement: CreateBlock(statements));
         }
 
-        public override SyntaxNode TryCatchStatement(IEnumerable<SyntaxNode> tryStatements, IEnumerable<SyntaxNode> catchClauses, IEnumerable<SyntaxNode> finallyStatements = null)
+        public override SyntaxNode TryCatchStatement(IEnumerable<SyntaxNode> tryStatements, IEnumerable<SyntaxNode> catchClauses, IEnumerable<SyntaxNode> finallyStatements = null, IEnumerable<SyntaxNode> faultedStatements = null)
         {
             return SyntaxFactory.TryStatement(
                 CreateBlock(tryStatements),
                 catchClauses != null ? SyntaxFactory.List(catchClauses.Cast<CatchClauseSyntax>()) : default,
-                finallyStatements != null ? SyntaxFactory.FinallyClause(CreateBlock(finallyStatements)) : null);
+                finallyStatements != null ? SyntaxFactory.FinallyClause(CreateBlock(finallyStatements)) : null,
+                faultedStatements != null ? SyntaxFactory.FaultedClause(CreateBlock(faultedStatements)) : null);
         }
 
         public override SyntaxNode CatchClause(SyntaxNode type, string name, IEnumerable<SyntaxNode> statements)

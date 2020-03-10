@@ -403,6 +403,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>Called when the visitor visits a FinallyClauseSyntax node.</summary>
         public virtual TResult VisitFinallyClause(FinallyClauseSyntax node) => this.DefaultVisit(node);
 
+        /// <summary>Called when the visitor visits a FaultedClauseSyntax node.</summary>
+        public virtual TResult VisitFaultedClause(FaultedClauseSyntax node) => this.DefaultVisit(node);
+
         /// <summary>Called when the visitor visits a CompilationUnitSyntax node.</summary>
         public virtual TResult VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
 
@@ -1051,6 +1054,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>Called when the visitor visits a FinallyClauseSyntax node.</summary>
         public virtual void VisitFinallyClause(FinallyClauseSyntax node) => this.DefaultVisit(node);
 
+        /// <summary>Called when the visitor visits a FaultedClauseSyntax node.</summary>
+        public virtual void VisitFaultedClause(FaultedClauseSyntax node) => this.DefaultVisit(node);
+
         /// <summary>Called when the visitor visits a CompilationUnitSyntax node.</summary>
         public virtual void VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
 
@@ -1685,7 +1691,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             => node.Update((PatternSyntax?)Visit(node.Pattern) ?? throw new ArgumentNullException("pattern"), (WhenClauseSyntax?)Visit(node.WhenClause), VisitToken(node.EqualsGreaterThanToken), (ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"));
 
         public override SyntaxNode? VisitTryStatement(TryStatementSyntax node)
-            => node.Update(VisitList(node.AttributeLists), VisitToken(node.TryKeyword), (BlockSyntax?)Visit(node.Block) ?? throw new ArgumentNullException("block"), VisitList(node.Catches), (FinallyClauseSyntax?)Visit(node.Finally));
+            => node.Update(VisitList(node.AttributeLists), VisitToken(node.TryKeyword), (BlockSyntax?)Visit(node.Block) ?? throw new ArgumentNullException("block"), VisitList(node.Catches), (FinallyClauseSyntax?)Visit(node.Finally), (FaultedClauseSyntax?)Visit(node.Faulted));
 
         public override SyntaxNode? VisitCatchClause(CatchClauseSyntax node)
             => node.Update(VisitToken(node.CatchKeyword), (CatchDeclarationSyntax?)Visit(node.Declaration), (CatchFilterClauseSyntax?)Visit(node.Filter), (BlockSyntax?)Visit(node.Block) ?? throw new ArgumentNullException("block"));
@@ -1698,6 +1704,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override SyntaxNode? VisitFinallyClause(FinallyClauseSyntax node)
             => node.Update(VisitToken(node.FinallyKeyword), (BlockSyntax?)Visit(node.Block) ?? throw new ArgumentNullException("block"));
+
+        public override SyntaxNode? VisitFaultedClause(FaultedClauseSyntax node)
+            => node.Update(VisitToken(node.FaultedKeyword), (BlockSyntax?)Visit(node.Block) ?? throw new ArgumentNullException("block"));
 
         public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
             => node.Update(VisitList(node.Externs), VisitList(node.Usings), VisitList(node.AttributeLists), VisitList(node.Members), VisitToken(node.EndOfFileToken));
@@ -4142,21 +4151,21 @@ namespace Microsoft.CodeAnalysis.CSharp
             => SyntaxFactory.SwitchExpressionArm(pattern, default, SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken), expression);
 
         /// <summary>Creates a new TryStatementSyntax instance.</summary>
-        public static TryStatementSyntax TryStatement(SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)
+        public static TryStatementSyntax TryStatement(SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted)
         {
             if (tryKeyword.Kind() != SyntaxKind.TryKeyword) throw new ArgumentException(nameof(tryKeyword));
             if (block == null) throw new ArgumentNullException(nameof(block));
-            return (TryStatementSyntax)Syntax.InternalSyntax.SyntaxFactory.TryStatement(attributeLists.Node.ToGreenList<Syntax.InternalSyntax.AttributeListSyntax>(), (Syntax.InternalSyntax.SyntaxToken)tryKeyword.Node!, (Syntax.InternalSyntax.BlockSyntax)block.Green, catches.Node.ToGreenList<Syntax.InternalSyntax.CatchClauseSyntax>(), @finally == null ? null : (Syntax.InternalSyntax.FinallyClauseSyntax)@finally.Green).CreateRed();
+            return (TryStatementSyntax)Syntax.InternalSyntax.SyntaxFactory.TryStatement(attributeLists.Node.ToGreenList<Syntax.InternalSyntax.AttributeListSyntax>(), (Syntax.InternalSyntax.SyntaxToken)tryKeyword.Node!, (Syntax.InternalSyntax.BlockSyntax)block.Green, catches.Node.ToGreenList<Syntax.InternalSyntax.CatchClauseSyntax>(), @finally == null ? null : (Syntax.InternalSyntax.FinallyClauseSyntax)@finally.Green, faulted == null ? null : (Syntax.InternalSyntax.FaultedClauseSyntax)faulted.Green).CreateRed();
         }
 
         /// <summary>Creates a new TryStatementSyntax instance.</summary>
-        public static TryStatementSyntax TryStatement(SyntaxList<AttributeListSyntax> attributeLists, BlockSyntax block, SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)
-            => SyntaxFactory.TryStatement(attributeLists, SyntaxFactory.Token(SyntaxKind.TryKeyword), block, catches, @finally);
+        public static TryStatementSyntax TryStatement(SyntaxList<AttributeListSyntax> attributeLists, BlockSyntax block, SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted)
+            => SyntaxFactory.TryStatement(attributeLists, SyntaxFactory.Token(SyntaxKind.TryKeyword), block, catches, @finally, faulted);
 
         #pragma warning disable RS0027
         /// <summary>Creates a new TryStatementSyntax instance.</summary>
         public static TryStatementSyntax TryStatement(SyntaxList<CatchClauseSyntax> catches = default)
-            => SyntaxFactory.TryStatement(default, SyntaxFactory.Token(SyntaxKind.TryKeyword), SyntaxFactory.Block(), catches, default);
+            => SyntaxFactory.TryStatement(default, SyntaxFactory.Token(SyntaxKind.TryKeyword), SyntaxFactory.Block(), catches, default, default);
         #pragma warning restore RS0027
 
         /// <summary>Creates a new CatchClauseSyntax instance.</summary>
@@ -4223,6 +4232,18 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>Creates a new FinallyClauseSyntax instance.</summary>
         public static FinallyClauseSyntax FinallyClause(BlockSyntax? block = default)
             => SyntaxFactory.FinallyClause(SyntaxFactory.Token(SyntaxKind.FinallyKeyword), block ?? SyntaxFactory.Block());
+
+        /// <summary>Creates a new FaultedClauseSyntax instance.</summary>
+        public static FaultedClauseSyntax FaultedClause(SyntaxToken faultedKeyword, BlockSyntax block)
+        {
+            if (faultedKeyword.Kind() != SyntaxKind.FaultedKeyword) throw new ArgumentException(nameof(faultedKeyword));
+            if (block == null) throw new ArgumentNullException(nameof(block));
+            return (FaultedClauseSyntax)Syntax.InternalSyntax.SyntaxFactory.FaultedClause((Syntax.InternalSyntax.SyntaxToken)faultedKeyword.Node!, (Syntax.InternalSyntax.BlockSyntax)block.Green).CreateRed();
+        }
+
+        /// <summary>Creates a new FaultedClauseSyntax instance.</summary>
+        public static FaultedClauseSyntax FaultedClause(BlockSyntax? block = default)
+            => SyntaxFactory.FaultedClause(SyntaxFactory.Token(SyntaxKind.FaultedKeyword), block ?? SyntaxFactory.Block());
 
         /// <summary>Creates a new CompilationUnitSyntax instance.</summary>
         public static CompilationUnitSyntax CompilationUnit(SyntaxList<ExternAliasDirectiveSyntax> externs, SyntaxList<UsingDirectiveSyntax> usings, SyntaxList<AttributeListSyntax> attributeLists, SyntaxList<MemberDeclarationSyntax> members, SyntaxToken endOfFileToken)

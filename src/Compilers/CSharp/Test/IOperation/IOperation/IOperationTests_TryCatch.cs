@@ -245,6 +245,7 @@ ITryOperation (OperationKind.Try, Type: null) (Syntax: 'try ... }')
             VerifyOperationTreeAndDiagnosticsForTest<TryStatementSyntax>(source, expectedOperationTree, expectedDiagnostics);
         }
 
+
         [CompilerTrait(CompilerFeature.IOperation)]
         [Fact]
         public void TryCatch_MultipleCatchClausesWithDifferentCaughtTypes()
@@ -310,6 +311,29 @@ ITryOperation (OperationKind.Try, Type: null) (Syntax: 'try ... }')
             };
 
             VerifyOperationTreeAndDiagnosticsForTest<TryStatementSyntax>(source, expectedOperationTree, expectedDiagnostics);
+        }
+
+        [CompilerTrait(CompilerFeature.IOperation)]
+        [Fact]
+        public void TryCatch_SingleFaultedBlock()
+        {
+            string source = @"
+class C
+{
+    public static int Main()
+    {
+        try
+        {
+        }
+        faulted
+        {
+return 1;
+        }
+return 0;
+    }
+}
+";
+            CompileAndVerify(source, expectedReturnCode: 1);
         }
 
         [CompilerTrait(CompilerFeature.IOperation)]

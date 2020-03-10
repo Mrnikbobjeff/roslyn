@@ -394,7 +394,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     locals: ImmutableArray<LocalSymbol>.Empty,
                     statements: ImmutableArray.Create<BoundStatement>(rewrittenBody)),
                 catchBlocks: ImmutableArray<BoundCatchBlock>.Empty,
-                finallyBlockOpt: finallyBlockOpt);
+                finallyBlockOpt: finallyBlockOpt, null);
             return tryFinally;
         }
 

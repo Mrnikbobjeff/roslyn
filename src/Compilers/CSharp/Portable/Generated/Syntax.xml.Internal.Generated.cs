@@ -16692,11 +16692,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         internal readonly BlockSyntax block;
         internal readonly GreenNode? catches;
         internal readonly FinallyClauseSyntax? @finally;
+        internal readonly FaultedClauseSyntax? faulted;
 
-        internal TryStatementSyntax(SyntaxKind kind, GreenNode? attributeLists, SyntaxToken tryKeyword, BlockSyntax block, GreenNode? catches, FinallyClauseSyntax? @finally, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+        internal TryStatementSyntax(SyntaxKind kind, GreenNode? attributeLists, SyntaxToken tryKeyword, BlockSyntax block, GreenNode? catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
           : base(kind, diagnostics, annotations)
         {
-            this.SlotCount = 5;
+            this.SlotCount = 6;
             if (attributeLists != null)
             {
                 this.AdjustFlagsAndWidth(attributeLists);
@@ -16716,13 +16717,18 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 this.AdjustFlagsAndWidth(@finally);
                 this.@finally = @finally;
             }
+            if (faulted != null)
+            {
+                this.AdjustFlagsAndWidth(faulted);
+                this.faulted = faulted;
+            }
         }
 
-        internal TryStatementSyntax(SyntaxKind kind, GreenNode? attributeLists, SyntaxToken tryKeyword, BlockSyntax block, GreenNode? catches, FinallyClauseSyntax? @finally, SyntaxFactoryContext context)
+        internal TryStatementSyntax(SyntaxKind kind, GreenNode? attributeLists, SyntaxToken tryKeyword, BlockSyntax block, GreenNode? catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted, SyntaxFactoryContext context)
           : base(kind)
         {
             this.SetFactoryContext(context);
-            this.SlotCount = 5;
+            this.SlotCount = 6;
             if (attributeLists != null)
             {
                 this.AdjustFlagsAndWidth(attributeLists);
@@ -16741,13 +16747,18 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             {
                 this.AdjustFlagsAndWidth(@finally);
                 this.@finally = @finally;
+            }
+            if (faulted != null)
+            {
+                this.AdjustFlagsAndWidth(faulted);
+                this.faulted = faulted;
             }
         }
 
-        internal TryStatementSyntax(SyntaxKind kind, GreenNode? attributeLists, SyntaxToken tryKeyword, BlockSyntax block, GreenNode? catches, FinallyClauseSyntax? @finally)
+        internal TryStatementSyntax(SyntaxKind kind, GreenNode? attributeLists, SyntaxToken tryKeyword, BlockSyntax block, GreenNode? catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted)
           : base(kind)
         {
-            this.SlotCount = 5;
+            this.SlotCount = 6;
             if (attributeLists != null)
             {
                 this.AdjustFlagsAndWidth(attributeLists);
@@ -16766,6 +16777,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             {
                 this.AdjustFlagsAndWidth(@finally);
                 this.@finally = @finally;
+            }
+            if (faulted != null)
+            {
+                this.AdjustFlagsAndWidth(faulted);
+                this.faulted = faulted;
             }
         }
 
@@ -16774,6 +16790,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         public BlockSyntax Block => this.block;
         public Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> Catches => new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax>(this.catches);
         public FinallyClauseSyntax? Finally => this.@finally;
+        public FaultedClauseSyntax? Faulted => this.faulted;
 
         internal override GreenNode? GetSlot(int index)
             => index switch
@@ -16783,6 +16800,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 2 => this.block,
                 3 => this.catches,
                 4 => this.@finally,
+                5 => this.faulted,
                 _ => null,
             };
 
@@ -16791,11 +16809,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         public override void Accept(CSharpSyntaxVisitor visitor) => visitor.VisitTryStatement(this);
         public override TResult Accept<TResult>(CSharpSyntaxVisitor<TResult> visitor) => visitor.VisitTryStatement(this);
 
-        public TryStatementSyntax Update(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax @finally)
+        public TryStatementSyntax Update(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax @finally, FaultedClauseSyntax faulted)
         {
-            if (attributeLists != this.AttributeLists || tryKeyword != this.TryKeyword || block != this.Block || catches != this.Catches || @finally != this.Finally)
+            if (attributeLists != this.AttributeLists || tryKeyword != this.TryKeyword || block != this.Block || catches != this.Catches || @finally != this.Finally || faulted != this.Faulted)
             {
-                var newNode = SyntaxFactory.TryStatement(attributeLists, tryKeyword, block, catches, @finally);
+                var newNode = SyntaxFactory.TryStatement(attributeLists, tryKeyword, block, catches, @finally, faulted);
                 var diags = GetDiagnostics();
                 if (diags?.Length > 0)
                     newNode = newNode.WithDiagnosticsGreen(diags);
@@ -16809,15 +16827,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         }
 
         internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-            => new TryStatementSyntax(this.Kind, this.attributeLists, this.tryKeyword, this.block, this.catches, this.@finally, diagnostics, GetAnnotations());
+            => new TryStatementSyntax(this.Kind, this.attributeLists, this.tryKeyword, this.block, this.catches, this.@finally, this.faulted, diagnostics, GetAnnotations());
 
         internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-            => new TryStatementSyntax(this.Kind, this.attributeLists, this.tryKeyword, this.block, this.catches, this.@finally, GetDiagnostics(), annotations);
+            => new TryStatementSyntax(this.Kind, this.attributeLists, this.tryKeyword, this.block, this.catches, this.@finally, this.faulted, GetDiagnostics(), annotations);
 
         internal TryStatementSyntax(ObjectReader reader)
           : base(reader)
         {
-            this.SlotCount = 5;
+            this.SlotCount = 6;
             var attributeLists = (GreenNode?)reader.ReadValue();
             if (attributeLists != null)
             {
@@ -16842,6 +16860,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 AdjustFlagsAndWidth(@finally);
                 this.@finally = @finally;
             }
+            var faulted = (FaultedClauseSyntax?)reader.ReadValue();
+            if (faulted != null)
+            {
+                AdjustFlagsAndWidth(faulted);
+                this.faulted = faulted;
+            }
         }
 
         internal override void WriteTo(ObjectWriter writer)
@@ -16852,6 +16876,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.block);
             writer.WriteValue(this.catches);
             writer.WriteValue(this.@finally);
+            writer.WriteValue(this.faulted);
         }
 
         static TryStatementSyntax()
@@ -17371,6 +17396,106 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         static FinallyClauseSyntax()
         {
             ObjectBinder.RegisterTypeReader(typeof(FinallyClauseSyntax), r => new FinallyClauseSyntax(r));
+        }
+    }
+
+    internal sealed partial class FaultedClauseSyntax : CSharpSyntaxNode
+    {
+        internal readonly SyntaxToken faultedKeyword;
+        internal readonly BlockSyntax block;
+
+        internal FaultedClauseSyntax(SyntaxKind kind, SyntaxToken faultedKeyword, BlockSyntax block, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+          : base(kind, diagnostics, annotations)
+        {
+            this.SlotCount = 2;
+            this.AdjustFlagsAndWidth(faultedKeyword);
+            this.faultedKeyword = faultedKeyword;
+            this.AdjustFlagsAndWidth(block);
+            this.block = block;
+        }
+
+        internal FaultedClauseSyntax(SyntaxKind kind, SyntaxToken faultedKeyword, BlockSyntax block, SyntaxFactoryContext context)
+          : base(kind)
+        {
+            this.SetFactoryContext(context);
+            this.SlotCount = 2;
+            this.AdjustFlagsAndWidth(faultedKeyword);
+            this.faultedKeyword = faultedKeyword;
+            this.AdjustFlagsAndWidth(block);
+            this.block = block;
+        }
+
+        internal FaultedClauseSyntax(SyntaxKind kind, SyntaxToken faultedKeyword, BlockSyntax block)
+          : base(kind)
+        {
+            this.SlotCount = 2;
+            this.AdjustFlagsAndWidth(faultedKeyword);
+            this.faultedKeyword = faultedKeyword;
+            this.AdjustFlagsAndWidth(block);
+            this.block = block;
+        }
+
+        public SyntaxToken FaultedKeyword => this.faultedKeyword;
+        public BlockSyntax Block => this.block;
+
+        internal override GreenNode? GetSlot(int index)
+            => index switch
+            {
+                0 => this.faultedKeyword,
+                1 => this.block,
+                _ => null,
+            };
+
+        internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new CSharp.Syntax.FaultedClauseSyntax(this, parent, position);
+
+        public override void Accept(CSharpSyntaxVisitor visitor) => visitor.VisitFaultedClause(this);
+        public override TResult Accept<TResult>(CSharpSyntaxVisitor<TResult> visitor) => visitor.VisitFaultedClause(this);
+
+        public FaultedClauseSyntax Update(SyntaxToken faultedKeyword, BlockSyntax block)
+        {
+            if (faultedKeyword != this.FaultedKeyword || block != this.Block)
+            {
+                var newNode = SyntaxFactory.FaultedClause(faultedKeyword, block);
+                var diags = GetDiagnostics();
+                if (diags?.Length > 0)
+                    newNode = newNode.WithDiagnosticsGreen(diags);
+                var annotations = GetAnnotations();
+                if (annotations?.Length > 0)
+                    newNode = newNode.WithAnnotationsGreen(annotations);
+                return newNode;
+            }
+
+            return this;
+        }
+
+        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+            => new FaultedClauseSyntax(this.Kind, this.faultedKeyword, this.block, diagnostics, GetAnnotations());
+
+        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+            => new FaultedClauseSyntax(this.Kind, this.faultedKeyword, this.block, GetDiagnostics(), annotations);
+
+        internal FaultedClauseSyntax(ObjectReader reader)
+          : base(reader)
+        {
+            this.SlotCount = 2;
+            var faultedKeyword = (SyntaxToken)reader.ReadValue();
+            AdjustFlagsAndWidth(faultedKeyword);
+            this.faultedKeyword = faultedKeyword;
+            var block = (BlockSyntax)reader.ReadValue();
+            AdjustFlagsAndWidth(block);
+            this.block = block;
+        }
+
+        internal override void WriteTo(ObjectWriter writer)
+        {
+            base.WriteTo(writer);
+            writer.WriteValue(this.faultedKeyword);
+            writer.WriteValue(this.block);
+        }
+
+        static FaultedClauseSyntax()
+        {
+            ObjectBinder.RegisterTypeReader(typeof(FaultedClauseSyntax), r => new FaultedClauseSyntax(r));
         }
     }
 
@@ -30986,6 +31111,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         public virtual TResult VisitCatchDeclaration(CatchDeclarationSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitCatchFilterClause(CatchFilterClauseSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitFinallyClause(FinallyClauseSyntax node) => this.DefaultVisit(node);
+        public virtual TResult VisitFaultedClause(FaultedClauseSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitExternAliasDirective(ExternAliasDirectiveSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitUsingDirective(UsingDirectiveSyntax node) => this.DefaultVisit(node);
@@ -31205,6 +31331,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         public virtual void VisitCatchDeclaration(CatchDeclarationSyntax node) => this.DefaultVisit(node);
         public virtual void VisitCatchFilterClause(CatchFilterClauseSyntax node) => this.DefaultVisit(node);
         public virtual void VisitFinallyClause(FinallyClauseSyntax node) => this.DefaultVisit(node);
+        public virtual void VisitFaultedClause(FaultedClauseSyntax node) => this.DefaultVisit(node);
         public virtual void VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
         public virtual void VisitExternAliasDirective(ExternAliasDirectiveSyntax node) => this.DefaultVisit(node);
         public virtual void VisitUsingDirective(UsingDirectiveSyntax node) => this.DefaultVisit(node);
@@ -31670,7 +31797,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             => node.Update((PatternSyntax)Visit(node.Pattern), (WhenClauseSyntax)Visit(node.WhenClause), (SyntaxToken)Visit(node.EqualsGreaterThanToken), (ExpressionSyntax)Visit(node.Expression));
 
         public override CSharpSyntaxNode VisitTryStatement(TryStatementSyntax node)
-            => node.Update(VisitList(node.AttributeLists), (SyntaxToken)Visit(node.TryKeyword), (BlockSyntax)Visit(node.Block), VisitList(node.Catches), (FinallyClauseSyntax)Visit(node.Finally));
+            => node.Update(VisitList(node.AttributeLists), (SyntaxToken)Visit(node.TryKeyword), (BlockSyntax)Visit(node.Block), VisitList(node.Catches), (FinallyClauseSyntax)Visit(node.Finally), (FaultedClauseSyntax)Visit(node.Faulted));
 
         public override CSharpSyntaxNode VisitCatchClause(CatchClauseSyntax node)
             => node.Update((SyntaxToken)Visit(node.CatchKeyword), (CatchDeclarationSyntax)Visit(node.Declaration), (CatchFilterClauseSyntax)Visit(node.Filter), (BlockSyntax)Visit(node.Block));
@@ -31683,6 +31810,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
         public override CSharpSyntaxNode VisitFinallyClause(FinallyClauseSyntax node)
             => node.Update((SyntaxToken)Visit(node.FinallyKeyword), (BlockSyntax)Visit(node.Block));
+
+        public override CSharpSyntaxNode VisitFaultedClause(FaultedClauseSyntax node)
+            => node.Update((SyntaxToken)Visit(node.FaultedKeyword), (BlockSyntax)Visit(node.Block));
 
         public override CSharpSyntaxNode VisitCompilationUnit(CompilationUnitSyntax node)
             => node.Update(VisitList(node.Externs), VisitList(node.Usings), VisitList(node.AttributeLists), VisitList(node.Members), (SyntaxToken)Visit(node.EndOfFileToken));
@@ -34651,7 +34781,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             return new SwitchExpressionArmSyntax(SyntaxKind.SwitchExpressionArm, pattern, whenClause, equalsGreaterThanToken, expression, this.context);
         }
 
-        public TryStatementSyntax TryStatement(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)
+        public TryStatementSyntax TryStatement(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted)
         {
             #if DEBUG
             if (tryKeyword == null) throw new ArgumentNullException(nameof(tryKeyword));
@@ -34659,7 +34789,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             if (block == null) throw new ArgumentNullException(nameof(block));
             #endif
 
-            return new TryStatementSyntax(SyntaxKind.TryStatement, attributeLists.Node, tryKeyword, block, catches.Node, @finally, this.context);
+            return new TryStatementSyntax(SyntaxKind.TryStatement, attributeLists.Node, tryKeyword, block, catches.Node, @finally, faulted, this.context);
         }
 
         public CatchClauseSyntax CatchClause(SyntaxToken catchKeyword, CatchDeclarationSyntax? declaration, CatchFilterClauseSyntax? filter, BlockSyntax block)
@@ -34723,6 +34853,27 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             if (cached != null) return (FinallyClauseSyntax)cached;
 
             var result = new FinallyClauseSyntax(SyntaxKind.FinallyClause, finallyKeyword, block, this.context);
+            if (hash >= 0)
+            {
+                SyntaxNodeCache.AddNode(result, hash);
+            }
+
+            return result;
+        }
+
+        public FaultedClauseSyntax FaultedClause(SyntaxToken faultedKeyword, BlockSyntax block)
+        {
+            #if DEBUG
+            if (faultedKeyword == null) throw new ArgumentNullException(nameof(faultedKeyword));
+            if (faultedKeyword.Kind != SyntaxKind.FaultedKeyword) throw new ArgumentException(nameof(faultedKeyword));
+            if (block == null) throw new ArgumentNullException(nameof(block));
+            #endif
+
+            int hash;
+            var cached = CSharpSyntaxNodeCache.TryGetNode((int)SyntaxKind.FaultedClause, faultedKeyword, block, this.context, out hash);
+            if (cached != null) return (FaultedClauseSyntax)cached;
+
+            var result = new FaultedClauseSyntax(SyntaxKind.FaultedClause, faultedKeyword, block, this.context);
             if (hash >= 0)
             {
                 SyntaxNodeCache.AddNode(result, hash);
@@ -39175,7 +39326,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             return new SwitchExpressionArmSyntax(SyntaxKind.SwitchExpressionArm, pattern, whenClause, equalsGreaterThanToken, expression);
         }
 
-        public static TryStatementSyntax TryStatement(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)
+        public static TryStatementSyntax TryStatement(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally, FaultedClauseSyntax? faulted)
         {
             #if DEBUG
             if (tryKeyword == null) throw new ArgumentNullException(nameof(tryKeyword));
@@ -39183,7 +39334,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             if (block == null) throw new ArgumentNullException(nameof(block));
             #endif
 
-            return new TryStatementSyntax(SyntaxKind.TryStatement, attributeLists.Node, tryKeyword, block, catches.Node, @finally);
+            return new TryStatementSyntax(SyntaxKind.TryStatement, attributeLists.Node, tryKeyword, block, catches.Node, @finally, faulted);
         }
 
         public static CatchClauseSyntax CatchClause(SyntaxToken catchKeyword, CatchDeclarationSyntax? declaration, CatchFilterClauseSyntax? filter, BlockSyntax block)
@@ -39247,6 +39398,27 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             if (cached != null) return (FinallyClauseSyntax)cached;
 
             var result = new FinallyClauseSyntax(SyntaxKind.FinallyClause, finallyKeyword, block);
+            if (hash >= 0)
+            {
+                SyntaxNodeCache.AddNode(result, hash);
+            }
+
+            return result;
+        }
+
+        public static FaultedClauseSyntax FaultedClause(SyntaxToken faultedKeyword, BlockSyntax block)
+        {
+            #if DEBUG
+            if (faultedKeyword == null) throw new ArgumentNullException(nameof(faultedKeyword));
+            if (faultedKeyword.Kind != SyntaxKind.FaultedKeyword) throw new ArgumentException(nameof(faultedKeyword));
+            if (block == null) throw new ArgumentNullException(nameof(block));
+            #endif
+
+            int hash;
+            var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.FaultedClause, faultedKeyword, block, out hash);
+            if (cached != null) return (FaultedClauseSyntax)cached;
+
+            var result = new FaultedClauseSyntax(SyntaxKind.FaultedClause, faultedKeyword, block);
             if (hash >= 0)
             {
                 SyntaxNodeCache.AddNode(result, hash);
@@ -41125,6 +41297,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 typeof(CatchDeclarationSyntax),
                 typeof(CatchFilterClauseSyntax),
                 typeof(FinallyClauseSyntax),
+                typeof(FaultedClauseSyntax),
                 typeof(CompilationUnitSyntax),
                 typeof(ExternAliasDirectiveSyntax),
                 typeof(UsingDirectiveSyntax),

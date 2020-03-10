@@ -201,6 +201,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
                     return LineBreaksAfterOpenBrace(currentToken, nextToken);
 
                 case SyntaxKind.FinallyKeyword:
+                case SyntaxKind.FaultedKeyword:
                     return 1;
 
                 case SyntaxKind.CloseBraceToken:
@@ -254,6 +255,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
                     return (nextToken.Parent.IsKind(SyntaxKind.Interpolation) || nextToken.Parent is InitializerExpressionSyntax) ? 0 : 1;
                 case SyntaxKind.ElseKeyword:
                 case SyntaxKind.FinallyKeyword:
+                case SyntaxKind.FaultedKeyword:
                     return 1;
                 case SyntaxKind.OpenBracketToken:
                     return (nextToken.Parent is AttributeListSyntax && !(nextToken.Parent.Parent is ParameterSyntax)) ? 1 : 0;
@@ -291,6 +293,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
                 case SyntaxKind.EndOfFileToken:
                 case SyntaxKind.CloseBraceToken:
                 case SyntaxKind.CatchKeyword:
+                case SyntaxKind.FaultedKeyword:
                 case SyntaxKind.FinallyKeyword:
                 case SyntaxKind.ElseKeyword:
                     return 1;

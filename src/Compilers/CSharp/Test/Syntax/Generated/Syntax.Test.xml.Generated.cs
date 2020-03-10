@@ -386,7 +386,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             => InternalSyntaxFactory.SwitchExpressionArm(GenerateDiscardPattern(), null, InternalSyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken), GenerateIdentifierName());
 
         private static Syntax.InternalSyntax.TryStatementSyntax GenerateTryStatement()
-            => InternalSyntaxFactory.TryStatement(new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.AttributeListSyntax>(), InternalSyntaxFactory.Token(SyntaxKind.TryKeyword), GenerateBlock(), new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.CatchClauseSyntax>(), null);
+            => InternalSyntaxFactory.TryStatement(new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.AttributeListSyntax>(), InternalSyntaxFactory.Token(SyntaxKind.TryKeyword), GenerateBlock(), new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.CatchClauseSyntax>(), null, null);
 
         private static Syntax.InternalSyntax.CatchClauseSyntax GenerateCatchClause()
             => InternalSyntaxFactory.CatchClause(InternalSyntaxFactory.Token(SyntaxKind.CatchKeyword), null, null, GenerateBlock());
@@ -399,6 +399,9 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
 
         private static Syntax.InternalSyntax.FinallyClauseSyntax GenerateFinallyClause()
             => InternalSyntaxFactory.FinallyClause(InternalSyntaxFactory.Token(SyntaxKind.FinallyKeyword), GenerateBlock());
+
+        private static Syntax.InternalSyntax.FaultedClauseSyntax GenerateFaultedClause()
+            => InternalSyntaxFactory.FaultedClause(InternalSyntaxFactory.Token(SyntaxKind.FaultedKeyword), GenerateBlock());
 
         private static Syntax.InternalSyntax.CompilationUnitSyntax GenerateCompilationUnit()
             => InternalSyntaxFactory.CompilationUnit(new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.ExternAliasDirectiveSyntax>(), new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.UsingDirectiveSyntax>(), new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.AttributeListSyntax>(), new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<Syntax.InternalSyntax.MemberDeclarationSyntax>(), InternalSyntaxFactory.Token(SyntaxKind.EndOfFileToken));
@@ -2213,6 +2216,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             Assert.NotNull(node.Block);
             Assert.Equal(default, node.Catches);
             Assert.Null(node.Finally);
+            Assert.Null(node.Faulted);
 
             AttachAndCheckDiagnostics(node);
         }
@@ -2262,6 +2266,17 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             var node = GenerateFinallyClause();
 
             Assert.Equal(SyntaxKind.FinallyKeyword, node.FinallyKeyword.Kind);
+            Assert.NotNull(node.Block);
+
+            AttachAndCheckDiagnostics(node);
+        }
+
+        [Fact]
+        public void TestFaultedClauseFactoryAndProperties()
+        {
+            var node = GenerateFaultedClause();
+
+            Assert.Equal(SyntaxKind.FaultedKeyword, node.FaultedKeyword.Kind);
             Assert.NotNull(node.Block);
 
             AttachAndCheckDiagnostics(node);
@@ -6803,6 +6818,32 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
         }
 
         [Fact]
+        public void TestFaultedClauseTokenDeleteRewriter()
+        {
+            var oldNode = GenerateFaultedClause();
+            var rewriter = new TokenDeleteRewriter();
+            var newNode = rewriter.Visit(oldNode);
+
+            if(!oldNode.IsMissing)
+            {
+                Assert.NotEqual(oldNode, newNode);
+            }
+
+            Assert.NotNull(newNode);
+            Assert.True(newNode.IsMissing, "No tokens => missing");
+        }
+
+        [Fact]
+        public void TestFaultedClauseIdentityRewriter()
+        {
+            var oldNode = GenerateFaultedClause();
+            var rewriter = new IdentityRewriter();
+            var newNode = rewriter.Visit(oldNode);
+
+            Assert.Same(oldNode, newNode);
+        }
+
+        [Fact]
         public void TestCompilationUnitTokenDeleteRewriter()
         {
             var oldNode = GenerateCompilationUnit();
@@ -9393,7 +9434,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             => SyntaxFactory.SwitchExpressionArm(GenerateDiscardPattern(), default(WhenClauseSyntax), SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken), GenerateIdentifierName());
 
         private static TryStatementSyntax GenerateTryStatement()
-            => SyntaxFactory.TryStatement(new SyntaxList<AttributeListSyntax>(), SyntaxFactory.Token(SyntaxKind.TryKeyword), GenerateBlock(), new SyntaxList<CatchClauseSyntax>(), default(FinallyClauseSyntax));
+            => SyntaxFactory.TryStatement(new SyntaxList<AttributeListSyntax>(), SyntaxFactory.Token(SyntaxKind.TryKeyword), GenerateBlock(), new SyntaxList<CatchClauseSyntax>(), default(FinallyClauseSyntax), default(FaultedClauseSyntax));
 
         private static CatchClauseSyntax GenerateCatchClause()
             => SyntaxFactory.CatchClause(SyntaxFactory.Token(SyntaxKind.CatchKeyword), default(CatchDeclarationSyntax), default(CatchFilterClauseSyntax), GenerateBlock());
@@ -9406,6 +9447,9 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
 
         private static FinallyClauseSyntax GenerateFinallyClause()
             => SyntaxFactory.FinallyClause(SyntaxFactory.Token(SyntaxKind.FinallyKeyword), GenerateBlock());
+
+        private static FaultedClauseSyntax GenerateFaultedClause()
+            => SyntaxFactory.FaultedClause(SyntaxFactory.Token(SyntaxKind.FaultedKeyword), GenerateBlock());
 
         private static CompilationUnitSyntax GenerateCompilationUnit()
             => SyntaxFactory.CompilationUnit(new SyntaxList<ExternAliasDirectiveSyntax>(), new SyntaxList<UsingDirectiveSyntax>(), new SyntaxList<AttributeListSyntax>(), new SyntaxList<MemberDeclarationSyntax>(), SyntaxFactory.Token(SyntaxKind.EndOfFileToken));
@@ -11220,7 +11264,8 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             Assert.NotNull(node.Block);
             Assert.Equal(default, node.Catches);
             Assert.Null(node.Finally);
-            var newNode = node.WithAttributeLists(node.AttributeLists).WithTryKeyword(node.TryKeyword).WithBlock(node.Block).WithCatches(node.Catches).WithFinally(node.Finally);
+            Assert.Null(node.Faulted);
+            var newNode = node.WithAttributeLists(node.AttributeLists).WithTryKeyword(node.TryKeyword).WithBlock(node.Block).WithCatches(node.Catches).WithFinally(node.Finally).WithFaulted(node.Faulted);
             Assert.Equal(node, newNode);
         }
 
@@ -11271,6 +11316,17 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             Assert.Equal(SyntaxKind.FinallyKeyword, node.FinallyKeyword.Kind());
             Assert.NotNull(node.Block);
             var newNode = node.WithFinallyKeyword(node.FinallyKeyword).WithBlock(node.Block);
+            Assert.Equal(node, newNode);
+        }
+
+        [Fact]
+        public void TestFaultedClauseFactoryAndProperties()
+        {
+            var node = GenerateFaultedClause();
+
+            Assert.Equal(SyntaxKind.FaultedKeyword, node.FaultedKeyword.Kind());
+            Assert.NotNull(node.Block);
+            var newNode = node.WithFaultedKeyword(node.FaultedKeyword).WithBlock(node.Block);
             Assert.Equal(node, newNode);
         }
 
@@ -15803,6 +15859,32 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
         public void TestFinallyClauseIdentityRewriter()
         {
             var oldNode = GenerateFinallyClause();
+            var rewriter = new IdentityRewriter();
+            var newNode = rewriter.Visit(oldNode);
+
+            Assert.Same(oldNode, newNode);
+        }
+
+        [Fact]
+        public void TestFaultedClauseTokenDeleteRewriter()
+        {
+            var oldNode = GenerateFaultedClause();
+            var rewriter = new TokenDeleteRewriter();
+            var newNode = rewriter.Visit(oldNode);
+
+            if(!oldNode.IsMissing)
+            {
+                Assert.NotEqual(oldNode, newNode);
+            }
+
+            Assert.NotNull(newNode);
+            Assert.True(newNode.IsMissing, "No tokens => missing");
+        }
+
+        [Fact]
+        public void TestFaultedClauseIdentityRewriter()
+        {
+            var oldNode = GenerateFaultedClause();
             var rewriter = new IdentityRewriter();
             var newNode = rewriter.Visit(oldNode);
 

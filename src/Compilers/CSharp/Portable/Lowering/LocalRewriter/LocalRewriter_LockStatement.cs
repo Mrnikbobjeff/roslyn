@@ -132,7 +132,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 rewrittenBody)),
                             ImmutableArray<BoundCatchBlock>.Empty,
                             BoundBlock.SynthesizedNoLocals(lockSyntax,
-                                exitCall))));
+                                exitCall), null)));
             }
             else
             {
@@ -179,7 +179,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                             lockSyntax,
                             BoundBlock.SynthesizedNoLocals(lockSyntax, rewrittenBody),
                             ImmutableArray<BoundCatchBlock>.Empty,
-                            BoundBlock.SynthesizedNoLocals(lockSyntax, exitCall))));
+                            BoundBlock.SynthesizedNoLocals(lockSyntax, exitCall), null)));
             }
         }
 

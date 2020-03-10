@@ -162,7 +162,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 {
                     // since finalized region is a try we can just attach finally to it
                     Debug.Assert(asTry.FinallyBlockOpt == null);
-                    return asTry.Update(asTry.TryBlock, asTry.CatchBlocks, rewrittenFinally, asTry.FinallyLabelOpt, asTry.PreferFaultHandler);
+                    return asTry.Update(asTry.TryBlock, asTry.CatchBlocks, rewrittenFinally, asTry.FaultedBlockOpt, asTry.FinallyLabelOpt, asTry.PreferFaultHandler);
                 }
                 else
                 {

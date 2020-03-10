@@ -1573,7 +1573,7 @@ namespace Microsoft.CodeAnalysis.Editing
         /// <summary>
         /// Creates a try-catch or try-catch-finally statement.
         /// </summary>
-        public abstract SyntaxNode TryCatchStatement(IEnumerable<SyntaxNode> tryStatements, IEnumerable<SyntaxNode> catchClauses, IEnumerable<SyntaxNode> finallyStatements = null);
+        public abstract SyntaxNode TryCatchStatement(IEnumerable<SyntaxNode> tryStatements, IEnumerable<SyntaxNode> catchClauses, IEnumerable<SyntaxNode> finallyStatements = null, IEnumerable<SyntaxNode> faultedStatements = null);
 
         /// <summary>
         /// Creates a try-catch or try-catch-finally statement.

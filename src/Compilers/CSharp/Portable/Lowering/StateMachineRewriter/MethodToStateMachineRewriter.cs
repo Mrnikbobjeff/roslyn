@@ -859,8 +859,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                     thenClause: (BoundBlock)this.Visit(node.FinallyBlockOpt)
                 ),
                 F.HiddenSequencePoint());
+            BoundBlock faultedBlockOpt = node.FaultedBlockOpt == null ? null : F.Block(
+               F.HiddenSequencePoint(),
+               (BoundBlock)this.Visit(node.FaultedBlockOpt),
+               F.HiddenSequencePoint());
 
-            BoundStatement result = node.Update(tryBlock, catchBlocks, finallyBlockOpt, node.FinallyLabelOpt, node.PreferFaultHandler);
+            BoundStatement result = node.Update(tryBlock, catchBlocks, finallyBlockOpt, faultedBlockOpt, node.FinallyLabelOpt, node.PreferFaultHandler);
 
             if ((object)dispatchLabel != null)
             {

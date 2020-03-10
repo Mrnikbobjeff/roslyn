@@ -668,7 +668,7 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.CodeGeneration
             Return SyntaxFactory.GreaterThanOrEqualExpression(Parenthesize(left), Parenthesize(right))
         End Function
 
-        Public Overrides Function TryCatchStatement(tryStatements As IEnumerable(Of SyntaxNode), catchClauses As IEnumerable(Of SyntaxNode), Optional finallyStatements As IEnumerable(Of SyntaxNode) = Nothing) As SyntaxNode
+        Public Overrides Function TryCatchStatement(tryStatements As IEnumerable(Of SyntaxNode), catchClauses As IEnumerable(Of SyntaxNode), Optional finallyStatements As IEnumerable(Of SyntaxNode) = Nothing, Optional faultedStatements As IEnumerable(Of SyntaxNode) = Nothing) As SyntaxNode
             Return SyntaxFactory.TryBlock(
                        GetStatementList(tryStatements),
                        If(catchClauses IsNot Nothing, SyntaxFactory.List(catchClauses.Cast(Of CatchBlockSyntax)()), Nothing),

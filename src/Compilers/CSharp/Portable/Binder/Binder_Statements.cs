@@ -2838,7 +2838,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             var tryBlock = BindEmbeddedBlock(node.Block, diagnostics);
             var catchBlocks = BindCatchBlocks(node.Catches, diagnostics);
             var finallyBlockOpt = (node.Finally != null) ? BindEmbeddedBlock(node.Finally.Block, diagnostics) : null;
-            return new BoundTryStatement(node, tryBlock, catchBlocks, finallyBlockOpt);
+            var faultedBlockOpt = (node.Faulted != null) ? BindEmbeddedBlock(node.Faulted.Block, diagnostics) : null;
+            return new BoundTryStatement(node, tryBlock, catchBlocks, finallyBlockOpt, faultedBlockOpt);
         }
 
         private ImmutableArray<BoundCatchBlock> BindCatchBlocks(SyntaxList<CatchClauseSyntax> catchClauses, DiagnosticBag diagnostics)

@@ -632,8 +632,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
     internal partial class BoundTryStatement
     {
-        public BoundTryStatement(SyntaxNode syntax, BoundBlock tryBlock, ImmutableArray<BoundCatchBlock> catchBlocks, BoundBlock finallyBlockOpt, LabelSymbol finallyLabelOpt = null)
-            : this(syntax, tryBlock, catchBlocks, finallyBlockOpt, finallyLabelOpt, preferFaultHandler: false, hasErrors: false)
+        public BoundTryStatement(SyntaxNode syntax, BoundBlock tryBlock, ImmutableArray<BoundCatchBlock> catchBlocks, BoundBlock finallyBlockOpt, BoundBlock faultedBlockOpt, LabelSymbol finallyLabelOpt = null)
+            : this(syntax, tryBlock, catchBlocks, finallyBlockOpt, faultedBlockOpt, finallyLabelOpt, preferFaultHandler: false, hasErrors: false)
         {
         }
     }

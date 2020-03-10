@@ -564,7 +564,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                     baseFinalizeCall)
                             )
                             { WasCompilerGenerated = true }
-                        )
+                        , null)
                         { WasCompilerGenerated = true }));
             }
 

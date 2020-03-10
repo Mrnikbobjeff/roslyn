@@ -1280,9 +1280,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             BoundBlock tryBlock,
             ImmutableArray<BoundCatchBlock> catchBlocks,
             BoundBlock finallyBlock = null,
+            BoundBlock faultBlock = null,
             LabelSymbol finallyLabel = null)
         {
-            return new BoundTryStatement(Syntax, tryBlock, catchBlocks, finallyBlock, finallyLabel) { WasCompilerGenerated = true };
+            return new BoundTryStatement(Syntax, tryBlock, catchBlocks, finallyBlock, faultBlock, finallyLabel) { WasCompilerGenerated = true };
         }
 
         internal ImmutableArray<BoundCatchBlock> CatchBlocks(
@@ -1308,7 +1309,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         internal BoundTryStatement Fault(BoundBlock tryBlock, BoundBlock faultBlock)
         {
-            return new BoundTryStatement(Syntax, tryBlock, ImmutableArray<BoundCatchBlock>.Empty, faultBlock, finallyLabelOpt: null, preferFaultHandler: true);
+            return new BoundTryStatement(Syntax, tryBlock, ImmutableArray<BoundCatchBlock>.Empty, null, faultBlock, finallyLabelOpt: null, preferFaultHandler: true);
         }
 
         internal BoundExpression NullOrDefault(TypeSymbol typeSymbol)

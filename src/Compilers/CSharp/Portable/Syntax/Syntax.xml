@@ -2714,6 +2714,7 @@
     <Field Name="Block" Type="BlockSyntax"/>
     <Field Name="Catches" Type="SyntaxList&lt;CatchClauseSyntax&gt;"/>
     <Field Name="Finally" Type="FinallyClauseSyntax" Optional="true"/>
+    <Field Name="Faulted" Type="FaultedClauseSyntax" Optional="true"/>
   </Node>
   <Node Name="CatchClauseSyntax" Base="CSharpSyntaxNode">
     <Kind Name="CatchClause"/>
@@ -2754,6 +2755,13 @@
     <Kind Name="FinallyClause"/>
     <Field Name="FinallyKeyword" Type="SyntaxToken">
       <Kind Name="FinallyKeyword"/>
+    </Field>
+    <Field Name="Block" Type="BlockSyntax"/>
+  </Node>
+  <Node Name="FaultedClauseSyntax" Base="CSharpSyntaxNode">
+    <Kind Name="FaultedClause"/>
+    <Field Name="FaultedKeyword" Type="SyntaxToken">
+      <Kind Name="FaultedKeyword"/>
     </Field>
     <Field Name="Block" Type="BlockSyntax"/>
   </Node>

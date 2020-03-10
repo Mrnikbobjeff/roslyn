@@ -1351,6 +1351,8 @@ namespace Microsoft.CodeAnalysis.CSharp.EditAndContinue
 
                 case SyntaxKind.CatchClause:
                     return ((CatchClauseSyntax)node).CatchKeyword.Span;
+                case SyntaxKind.FaultedClause:
+                    return ((FaultedClauseSyntax)node).FaultedKeyword.Span;
 
                 case SyntaxKind.CatchDeclaration:
                 case SyntaxKind.CatchFilterClause:
@@ -3029,7 +3031,8 @@ namespace Microsoft.CodeAnalysis.CSharp.EditAndContinue
                     var oldTryStatement = (TryStatementSyntax)oldNode;
                     var newTryStatement = (TryStatementSyntax)newNode;
                     return SyntaxFactory.AreEquivalent(oldTryStatement.Finally, newTryStatement.Finally)
-                        && SyntaxFactory.AreEquivalent(oldTryStatement.Catches, newTryStatement.Catches);
+                        && SyntaxFactory.AreEquivalent(oldTryStatement.Catches, newTryStatement.Catches)
+                        && SyntaxFactory.AreEquivalent(oldTryStatement.Faulted, newTryStatement.Faulted);
 
                 case SyntaxKind.CatchClause:
                 case SyntaxKind.FinallyClause:
@@ -3080,6 +3083,10 @@ namespace Microsoft.CodeAnalysis.CSharp.EditAndContinue
                     return node.Span;
 
                 case SyntaxKind.FinallyClause:
+                    coversAllChildren = true;
+                    tryStatement = (TryStatementSyntax)node.Parent!;
+                    return tryStatement.Span;
+                case SyntaxKind.FaultedClause:
                     coversAllChildren = true;
                     tryStatement = (TryStatementSyntax)node.Parent!;
                     return tryStatement.Span;
